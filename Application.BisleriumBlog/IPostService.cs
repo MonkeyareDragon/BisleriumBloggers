@@ -10,8 +10,8 @@ namespace Application.BisleriumBlog
     public interface IPostService
     {
         Task<Post> AddPost(Post post);
-        Task<IEnumerable<Post>> GetAllPost();
-        Task<Post> UpdatePost(Post post);
+        Task<IEnumerable<Post>> GetAllPosts();
+        Task<Post?> UpdatePost(Post post);
         Task DeletePost(string id);
         Task<IEnumerable<Post>> GetPostbyId(string id);
     }

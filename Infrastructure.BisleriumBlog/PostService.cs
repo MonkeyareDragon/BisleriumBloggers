@@ -35,7 +35,7 @@ namespace Infrastructure.BisleriumBlog
             }
         }
 
-        public async Task<IEnumerable<Post>> GetAllPost()
+        public async Task<IEnumerable<Post>> GetAllPosts()
         {
             return await _dbContext.Posts.ToListAsync();
         }
@@ -46,7 +46,7 @@ namespace Infrastructure.BisleriumBlog
             return result;
         }
 
-        public async Task<Post> UpdatePost(Post post)
+        public async Task<Post?> UpdatePost(Post post)
         {
             var selectedPost = await _dbContext.Posts.FindAsync(post.PostId);
             if (selectedPost != null)
@@ -63,7 +63,7 @@ namespace Infrastructure.BisleriumBlog
             }
             else
             {
-                throw new InvalidOperationException("Post not found");
+                return null;
             }
         }
     }

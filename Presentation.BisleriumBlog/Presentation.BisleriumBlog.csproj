@@ -11,7 +11,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
+    <ProjectReference Include="..\Application.BisleriumBlog\Application.BisleriumBlog.csproj" />
+    <ProjectReference Include="..\Domain.BisleriumBlog\Domain.BisleriumBlog.csproj" />
+    <ProjectReference Include="..\Infrastructure.BisleriumBlog\Infrastructure.BisleriumBlog.csproj" />
   </ItemGroup>
 
 </Project>
