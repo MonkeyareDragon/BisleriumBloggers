@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Application.BisleriumBlog\Application.BisleriumBlog.csproj" />
+    <ProjectReference Include="..\Domain.BisleriumBlog\Domain.BisleriumBlog.csproj" />
+  </ItemGroup>
+
 </Project>
