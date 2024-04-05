@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application.BisleriumBlog",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure.BisleriumBlog", "Infrastructure.BisleriumBlog\Infrastructure.BisleriumBlog.csproj", "{BEAB6CD0-0B53-4E7B-950C-42B8C342BC2D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Presentation.BisleriumBlog", "Presentation.BisleriumBlog\Presentation.BisleriumBlog.csproj", "{2B6DA904-5594-4B88-B934-BC2A530CAD7A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{BEAB6CD0-0B53-4E7B-950C-42B8C342BC2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BEAB6CD0-0B53-4E7B-950C-42B8C342BC2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BEAB6CD0-0B53-4E7B-950C-42B8C342BC2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B6DA904-5594-4B88-B934-BC2A530CAD7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B6DA904-5594-4B88-B934-BC2A530CAD7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B6DA904-5594-4B88-B934-BC2A530CAD7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B6DA904-5594-4B88-B934-BC2A530CAD7A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
