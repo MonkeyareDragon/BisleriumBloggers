@@ -1,4 +1,5 @@
 ﻿using Domain.BisleriumBlog;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.BisleriumBlog
 {
-    public class ApplicationDBContext : DbContext 
+    public class ApplicationDBContext : IdentityDbContext<AppUser> 
     {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
