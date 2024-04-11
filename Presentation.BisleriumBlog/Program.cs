@@ -24,11 +24,29 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<IPostService, PostService>();
 
 //Activate Identity APIs
-builder.Services.AddIdentityCore<AppUser>()
+builder.Services.AddIdentity<AppUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDBContext>()
     .AddApiEndpoints();
 
 var app = builder.Build();
+
+// Seed roles into the database
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+    // Define roles
+    string[] roles = { "Admin", "Blogger" };
+
+    // Seed roles if they don't exist
+    foreach (var roleName in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(roleName))
+        {
+            await roleManager.CreateAsync(new IdentityRole(roleName));
+        }
+    }
+}
 
 //Map Identity routes
 app.MapIdentityApi<AppUser>();
