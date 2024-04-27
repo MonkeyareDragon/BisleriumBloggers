@@ -98,6 +98,47 @@ namespace Presentation.BisleriumBlog.Controllers
             return BadRequest("Invalid password.");
         }
 
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            // Generate password reset token
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            // Send the token to the user's email
+            // For demonstration purposes, we'll just return the token and user id
+            return Ok(new { UserId = user.Id, Token = token });
+        }
+
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ResetPassword(string userId, string token, ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            // Reset password
+            var result = await _userManager.ResetPasswordAsync(user, token, model.NewPassword);
+            if (result.Succeeded)
+            {
+                return Ok("Password reset successfully.");
+            }
+
+            return BadRequest(result.Errors);
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetUsers()
         {
