@@ -54,7 +54,7 @@ namespace Infrastructure.BisleriumBlog
                 selectedPost.Title = post.Title;
                 selectedPost.Content = post.Content;
                 selectedPost.ImageUrl = post.ImageUrl;
-                selectedPost.UpdatedDate = DateTime.UtcNow;
+                selectedPost.CreatedAt = DateTime.UtcNow;
                 
                 _dbContext.Entry(selectedPost).State = EntityState.Modified;
                 await _dbContext.SaveChangesAsync();

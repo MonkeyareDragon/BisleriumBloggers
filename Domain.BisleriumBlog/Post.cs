@@ -12,10 +12,13 @@ namespace Domain.BisleriumBlog
         [Key]
         public Guid PostId { get; set; }
         [Required]
+        public int UserId { get; set; }
+        [Required]
         public string? Title { get; set; }
         public string? Content { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public DateTime UpdatedDate { get; set; }
         public string? ImageUrl { get; set; }
+        public DateTime? CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+        public AppUser? User { get; set; }
     }
 }

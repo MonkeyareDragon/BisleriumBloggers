@@ -26,7 +26,7 @@ namespace Presentation.BisleriumBlog.Controllers
                 return BadRequest(ModelState);
             }
 
-            var user = new AppUser { UserName = model.Email, Email = model.Email };
+            var user = new AppUser { UserName = model.Email, Email = model.Email, CreatedAt = DateTime.Now, Address = model.Address, Gender = model.Gender };
 
             // Check if the specified role exists
             var roleExists = await _roleManager.RoleExistsAsync(model.Role);

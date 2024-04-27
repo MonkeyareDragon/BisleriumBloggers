@@ -23,5 +23,9 @@ namespace Domain.BisleriumBlog
 
         [Required]
         public string? Role { get; set; } // Property to specify the role of the user
+
+        public string? Address { get; set; }
+
+        public string? Gender { get; set; }
     }
 }

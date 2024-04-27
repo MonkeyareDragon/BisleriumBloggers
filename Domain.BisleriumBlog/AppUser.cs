@@ -11,5 +11,7 @@ namespace Domain.BisleriumBlog
     {
         public string? Address { get; set; }
         public string? Gender { get; set; }
+        public DateTime? CreatedAt { get; set; }
+        public ICollection<Post>? Posts { get; set; }
     }
 }
