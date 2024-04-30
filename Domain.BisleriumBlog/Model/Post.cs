@@ -5,14 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.BisleriumBlog
+namespace Domain.BisleriumBlog.Model
 {
     public class Post
     {
         [Key]
         public Guid PostId { get; set; }
         [Required]
-        public int UserId { get; set; }
+        public string? UserId { get; set; }
         [Required]
         public string? Title { get; set; }
         public string? Content { get; set; }

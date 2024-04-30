@@ -1,11 +1,11 @@
 using Application.BisleriumBlog;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Domain.BisleriumBlog;
 using Infrastructure.BisleriumBlog;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Domain.BisleriumBlog.Model;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,5 +1,5 @@
 ﻿using Application.BisleriumBlog;
-using Domain.BisleriumBlog;
+using Domain.BisleriumBlog.Model;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -18,11 +18,22 @@ namespace Infrastructure.BisleriumBlog
             _dbContext = dbContext;
         }
 
-        public async Task<Post> AddPost(Post post)
+        public async Task<Post> AddPost(string userId, string title, string content, string imageUrl)
         {
-            var result = await _dbContext.Posts.AddAsync(post);
+            var post = new Post
+            {
+                PostId = Guid.NewGuid(),
+                UserId = userId,
+                Title = title,
+                Content = content,
+                ImageUrl = imageUrl,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _dbContext.Posts.Add(post);
             await _dbContext.SaveChangesAsync();
-            return result.Entity;
+
+            return post;
         }
 
         public async Task DeletePost(string id)
@@ -54,7 +65,7 @@ namespace Infrastructure.BisleriumBlog
                 selectedPost.Title = post.Title;
                 selectedPost.Content = post.Content;
                 selectedPost.ImageUrl = post.ImageUrl;
-                selectedPost.CreatedAt = DateTime.UtcNow;
+                selectedPost.UpdatedAt = DateTime.UtcNow;
                 
                 _dbContext.Entry(selectedPost).State = EntityState.Modified;
                 await _dbContext.SaveChangesAsync();
