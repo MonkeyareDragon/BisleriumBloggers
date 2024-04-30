@@ -1,5 +1,6 @@
 ﻿using Application.BisleriumBlog;
 using Domain.BisleriumBlog;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.BisleriumBlog.Controllers
@@ -14,6 +15,7 @@ namespace Presentation.BisleriumBlog.Controllers
         }
 
         [HttpPost, Route("AddPost")]
+        [Authorize(Roles = "Admin, Blogger")]
         public async Task<IActionResult> AddPost(Post post)
         {
             var addPost = await _postService.AddPost(post);
@@ -21,12 +23,14 @@ namespace Presentation.BisleriumBlog.Controllers
         }
 
         [HttpGet, Route("GetAllPosts")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAllPost()
         {
             return Ok(await _postService.GetAllPosts());
         }
 
         [HttpGet, Route("GetPostByID")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetPostByID(string id)
         {
             var result = await _postService.GetPostbyId(id);
@@ -34,6 +38,7 @@ namespace Presentation.BisleriumBlog.Controllers
         }
 
         [HttpDelete, Route("DeletePostByID")]
+        [Authorize(Roles = "Admin, Blogger")]
         public async Task<IActionResult> DeletePostByID(string id)
         {
             await _postService.DeletePost(id);
@@ -41,6 +46,7 @@ namespace Presentation.BisleriumBlog.Controllers
         }
 
         [HttpPut, Route("UpdatePostByID")]
+        [Authorize(Roles = "Admin, Blogger")]
         public async Task<IActionResult> UpdateStudentByID(Post post)
         {
             var updatedPost = await _postService.UpdatePost(post);

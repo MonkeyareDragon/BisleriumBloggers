@@ -29,11 +29,15 @@ builder.Services.AddScoped<IPostService, PostService>();
 
 //Activate Identity APIs
 builder.Services.AddIdentity<AppUser, IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDBContext>()
-    .AddApiEndpoints();
+    .AddEntityFrameworkStores<ApplicationDBContext>().AddSignInManager()
+    .AddRoles<IdentityRole>();
 
 // Add Authentication
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
@@ -47,9 +51,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
         };
     });
-
-// Add Authorization
-builder.Services.AddAuthorization();
 
 // Add SwaggerGen
 builder.Services.AddSwaggerGen(c =>
@@ -101,7 +102,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 //Map Identity routes
-app.MapIdentityApi<AppUser>();
+//app.MapIdentityApi<AppUser>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

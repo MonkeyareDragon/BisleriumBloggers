@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -17,15 +16,43 @@ namespace Presentation.BisleriumBlog.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
+        private readonly SignInManager<AppUser> _signInManager;
 
-        public AccountController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
+        public record LoginResponse(bool Flag, string Token, String Message);
+        public record UserSession(string? Id, string? Name, string? Email, string? Role);
+
+        public AccountController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration, SignInManager<AppUser> signInManager)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _configuration = configuration;
+            _signInManager = signInManager;
         }
 
-        [HttpPost("register")]
+        //Generate Jwt Token
+        private string GenerateToken(UserSession user)
+        {
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var userClaims = new[]
+            {
+              new Claim(ClaimTypes.NameIdentifier, user.Id),
+              new Claim(ClaimTypes.Name, user.Name),
+              new Claim(ClaimTypes.Email, user.Email),
+              new Claim(ClaimTypes.Role, user.Role)
+            };
+
+            var token = new JwtSecurityToken(
+              issuer: _configuration["Jwt:Issuer"],
+              audience: _configuration["Jwt:Audience"],
+              claims: userClaims,
+              expires: DateTime.Now.AddDays(1),
+              signingCredentials: credentials
+            );
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        [HttpPost("Register")]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
             if (!ModelState.IsValid)
@@ -48,54 +75,31 @@ namespace Presentation.BisleriumBlog.Controllers
             {
                 // Assign the specified role to the user
                 await _userManager.AddToRoleAsync(user, model.Role);
-
-
-
                 return Ok("User registered successfully.");
             }
 
             return BadRequest(result.Errors);
         }
 
-        [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        [HttpPost("Login")]
+        public async Task<LoginResponse> Login([FromBody] LoginViewModel loginUser)
         {
-            if (!ModelState.IsValid)
+            var result = await _signInManager.PasswordSignInAsync(loginUser.Email, loginUser.Password, false, lockoutOnFailure: false);
+            if (result.Succeeded)
             {
-                return BadRequest(ModelState);
-            }
 
-            var user = await _userManager.FindByEmailAsync(model.Email);
-            if (user == null)
+                var getUser = await _userManager.FindByEmailAsync(loginUser.Email);
+                var getUserRole = await _userManager.GetRolesAsync(getUser);
+                var userSession = new UserSession(getUser.Id, getUser.UserName, getUser.Email, getUserRole.First());
+                string token = GenerateToken(userSession);
+
+                return new LoginResponse(true, token!, "Login completed");
+
+            }
+            else
             {
-                return NotFound("User not found.");
+                return new LoginResponse(false, null!, "Login not completed");
             }
-
-            var result = await _userManager.CheckPasswordAsync(user, model.Password);
-            if (result)
-            {
-                // Generate JWT token
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
-                var tokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = new ClaimsIdentity(new Claim[]
-                    {
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim(ClaimTypes.Email, user.Email),
-                        // Add other claims as needed
-                    }),
-                    Expires = DateTime.UtcNow.AddDays(7), // Token expiration time
-                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-                };
-
-                var token = tokenHandler.CreateToken(tokenDescriptor);
-                var tokenString = tokenHandler.WriteToken(token);
-
-                return Ok(new { Token = tokenString });
-            }
-
-            return BadRequest("Invalid password.");
         }
 
         [HttpPost("forgot-password")]
