@@ -7,20 +7,19 @@ using System.Threading.Tasks;
 
 namespace Domain.BisleriumBlog.Model
 {
-    public class Comment
+    public class Reply
     {
         [Key]
-        public Guid CommentId { get; set; }
+        public Guid ReplyId { get; set; }
         [Required]
         public string? UserId { get; set; }
         [Required]
-        public Guid PostId { get; set; }
+        public Guid CommentId { get; set; }
         [Required]
-        public string? CommentText { get; set; }
+        public string? ReplyText { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public AppUser? User { get; set; }
-        public Post? Post { get; set; }
-        public ICollection<Reply>? Replys { get; set; }
+        public Comment? Comment { get; set; }
     }
 }

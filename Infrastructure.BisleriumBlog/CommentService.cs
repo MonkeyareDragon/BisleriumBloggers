@@ -51,7 +51,7 @@ namespace Infrastructure.BisleriumBlog
                 await _dbContext.SaveChangesAsync();
             }
         }
-        public async Task<Comment> UpdateComment(Comment comment)
+        public async Task<Comment?> UpdateComment(Comment comment)
         {
             var selectedComment = await _dbContext.Comments.FindAsync(comment.CommentId);
             if (selectedComment != null)

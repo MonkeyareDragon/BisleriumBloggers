@@ -20,5 +20,10 @@ namespace Domain.BisleriumBlog.View_Model
             public Guid CommentId { get; set; }
             public string? CommentText { get; set; }
         }
+        public class ReplyRequestModel
+        {
+            public Guid CommentId { get; set; }
+            public string? ReplyText { get; set; }
+        }
     }
 }

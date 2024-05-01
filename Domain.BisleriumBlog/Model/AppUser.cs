@@ -14,5 +14,6 @@ namespace Domain.BisleriumBlog.Model
         public DateTime? CreatedAt { get; set; }
         public ICollection<Post>? Posts { get; set; }
         public ICollection<Comment>? Comments { get; set; }
+        public ICollection<Reply>? Replys { get; set; }
     }
 }

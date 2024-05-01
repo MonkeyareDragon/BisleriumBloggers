@@ -13,6 +13,6 @@ namespace Application.BisleriumBlog
         Task<IEnumerable<Comment>> GetAllComments();
         Task<IEnumerable<Comment>> GetCommentbyId(string id);
         Task DeleteComment(string id);
-        Task<Comment> UpdateComment(Comment comment);
+        Task<Comment?> UpdateComment(Comment comment);
     }
 }

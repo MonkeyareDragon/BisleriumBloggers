@@ -35,8 +35,23 @@ namespace Infrastructure.BisleriumBlog
                 .WithMany(u => u.Comments)
                 .HasForeignKey(c => c.UserId)
                 .IsRequired();
+
+            //One-to-Many Relationship between Comment and Reply
+            builder.Entity<Reply>()
+                .HasOne(r => r.Comment)
+                .WithMany(r => r.Replys)
+                .HasForeignKey(r => r.CommentId)
+                .IsRequired();
+
+            //One-to-Many Relationship between User and Relpy
+            builder.Entity<Reply>()
+                .HasOne(c => c.User)
+                .WithMany(r => r.Replys)
+                .HasForeignKey(c => c.UserId)
+                .IsRequired();
         }
         public DbSet<Post> Posts { get; set; }
         public DbSet<Comment> Comments { get; set; }
+        public DbSet<Reply> Replys { get; set; }
     }
 }

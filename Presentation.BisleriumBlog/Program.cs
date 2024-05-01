@@ -27,6 +27,7 @@ builder.Services.AddControllers();
 //Add Controller and Interface
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<IReplyService, ReplyService>();
 
 //Activate Identity APIs
 builder.Services.AddIdentity<AppUser, IdentityRole>()
