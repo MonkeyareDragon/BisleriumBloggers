@@ -29,6 +29,7 @@ builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IReplyService, ReplyService>();
 builder.Services.AddScoped<IVoteService, VoteService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 //Activate Identity APIs
 builder.Services.AddIdentity<AppUser, IdentityRole>()
