@@ -21,5 +21,6 @@ namespace Domain.BisleriumBlog.Model
         public DateTime? UpdatedAt { get; set; }
         public AppUser? User { get; set; }
         public ICollection<Comment>? Comments { get; set; }
+        public ICollection<Vote>? Votes { get; set; }
     }
 }

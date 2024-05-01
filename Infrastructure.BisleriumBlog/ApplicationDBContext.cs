@@ -49,9 +49,53 @@ namespace Infrastructure.BisleriumBlog
                 .WithMany(r => r.Replys)
                 .HasForeignKey(c => c.UserId)
                 .IsRequired();
+
+            // Many-to-One Relationship between User and Vote
+            builder.Entity<Vote>()
+                .HasOne(v => v.User)
+                .WithMany(u => u.Votes)
+                .HasForeignKey(v => v.UserId)
+                .IsRequired();
+
+            // Many-to-One Relationship between Post and Vote
+            builder.Entity<Vote>()
+                .HasOne(v => v.Post)
+                .WithMany(p => p.Votes)
+                .HasForeignKey(v => v.PostId);
+
+            // Many-to-One Relationship between Comment and Vote
+            builder.Entity<Vote>()
+                .HasOne(v => v.Comment)
+                .WithMany(c => c.Votes)
+                .HasForeignKey(v => v.CommentId);
+
+            // Many-to-One Relationship between Reply and Vote
+            builder.Entity<Vote>()
+                .HasOne(v => v.Reply)
+                .WithMany(r => r.Votes)
+                .HasForeignKey(v => v.ReplyId);
+
+            // Enum for VoteType
+            builder.Entity<Vote>()
+                .Property(v => v.VoteType)
+                .HasConversion<string>();
+
+            // Ensure unique constraint for (UserId, PostId), (UserId, CommentId), (UserId, ReplyId)
+            builder.Entity<Vote>()
+                .HasIndex(v => new { v.UserId, v.PostId })
+                .IsUnique();
+
+            builder.Entity<Vote>()
+                .HasIndex(v => new { v.UserId, v.CommentId })
+                .IsUnique();
+
+            builder.Entity<Vote>()
+                .HasIndex(v => new { v.UserId, v.ReplyId })
+                .IsUnique();
         }
         public DbSet<Post> Posts { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Reply> Replys { get; set; }
+        public DbSet<Vote> Votes { get; set; }
     }
 }
