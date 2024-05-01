@@ -31,6 +31,11 @@ builder.Services.AddScoped<IReplyService, ReplyService>();
 builder.Services.AddScoped<IVoteService, VoteService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 
+builder.Services.AddControllersWithViews()
+    .AddNewtonsoftJson(options =>
+    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+);
+
 //Activate Identity APIs
 builder.Services.AddIdentity<AppUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDBContext>().AddSignInManager()

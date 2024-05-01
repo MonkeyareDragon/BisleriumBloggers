@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.BisleriumBlog.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,5 +12,9 @@ namespace Application.BisleriumBlog
     {
         Task<DashboardCounts> GetDashboardCounts();
         Task<DashboardCounts> GetDashboardCountsOnChoosenTime(DateTime startDate, DateTime endDate);
+        Task<List<Post>> GetMostPopularPostsAllTime();
+        Task<List<Post>> GetMostPopularPostsChosenMonth(int month);
+        Task<List<AppUser>> GetMostPopularBloggersAllTime();
+        Task<List<AppUser>> GetMostPopularBloggersChosenMonth(int month);
     }
 }

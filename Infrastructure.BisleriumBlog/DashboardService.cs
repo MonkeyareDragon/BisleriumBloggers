@@ -1,8 +1,10 @@
 ﻿using Application.BisleriumBlog;
 using Domain.BisleriumBlog.Model;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -53,6 +55,95 @@ namespace Infrastructure.BisleriumBlog
                 UpvoteCount = upvoteCount,
                 DownvoteCount = downvoteCount
             };
+        }
+
+        private int CalculatePopularity(Post post)
+        {
+            // Calculate the upvotes and downvotes for the given post
+            int upvotes = _dbContext.Votes.Count(v => v.PostId == post.PostId && v.VoteType == VoteType.Upvote);
+            int downvotes = _dbContext.Votes.Count(v => v.PostId == post.PostId && v.VoteType == VoteType.Downvote);
+            int commentsCount = post.Comments != null ? post.Comments.Count : 0;
+
+            // Calculate and return the popularity score for the given post
+            int popularity = (upvotes * 2) + (downvotes * -1) + commentsCount;
+            return popularity;
+        }
+
+        public async Task<List<Post>> GetMostPopularPostsAllTime()
+        {
+            var posts = await _dbContext.Posts
+                .Include(p => p.Comments)
+                .ToListAsync();
+
+            // Order posts by popularity using LINQ without modifying the Post class
+            var popularPosts = posts.OrderByDescending(p => CalculatePopularity(p)).Take(10).ToList();
+
+            return popularPosts;
+        }
+
+        public async Task<List<Post>> GetMostPopularPostsChosenMonth(int month)
+        {
+            var posts = await _dbContext.Posts
+                .Include(p => p.Comments)
+                .ToListAsync();
+
+            // Filter posts based on the chosen month
+            posts = posts.Where(p => p.CreatedAt?.Month == month).ToList();
+
+            // Order posts by popularity using LINQ without modifying the Post class
+            var popularPosts = posts.OrderByDescending(p => CalculatePopularity(p)).Take(10).ToList();
+
+            return popularPosts;
+        }
+
+        public async Task<List<AppUser>> GetMostPopularBloggersAllTime()
+        {
+            var posts = await _dbContext.Posts
+                .Include(p => p.User)
+                .ToListAsync();
+
+            var bloggers = posts.GroupBy(p => p.UserId)
+                .Select(g => new
+                {
+                    UserId = g.Key,
+                    PopularityScore = g.Sum(p => CalculatePopularity(p))
+                })
+                .OrderByDescending(g => g.PopularityScore)
+                .Take(10)
+                .ToList();
+
+            var popularBloggers = await _dbContext.Users
+                .Where(u => bloggers.Select(b => b.UserId).Contains(u.Id))
+                .ToListAsync();
+
+            return popularBloggers;
+        }
+
+        public async Task<List<AppUser>> GetMostPopularBloggersChosenMonth(int month)
+        {
+            var startDate = new DateTime(DateTime.Now.Year, month, 1);
+            var endDate = startDate.AddMonths(1).Date;
+
+            var posts = await _dbContext.Posts
+                .Include(p => p.User)
+                .Where(p => p.CreatedAt >= startDate && p.CreatedAt <= endDate)
+                .ToListAsync();
+
+            var bloggers = posts.GroupBy(p => p.UserId)
+                .Select(g => new
+                {
+                    UserId = g.Key,
+                    PopularityScore = g.Sum(p => CalculatePopularity(p))
+                })
+                .OrderByDescending(g => g.PopularityScore)
+                .Take(10)
+                .ToList();
+
+            var popularBloggers = await _dbContext.Users
+                .Where(u => bloggers.Select(b => b.UserId).Contains(u.Id))
+                .ToListAsync();
+
+            return popularBloggers;
         }
     }
 }

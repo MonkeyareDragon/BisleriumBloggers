@@ -42,5 +42,66 @@ namespace Presentation.BisleriumBlog.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        [HttpGet, Route("dashboard/popular-posts-all-time")]
+        [Authorize(Roles = "Admin")] 
+        public async Task<IActionResult> GetPopularPostsAllTime()
+        {
+            try
+            {
+                var popularPosts = await _dashboardService.GetMostPopularPostsAllTime();
+                return Ok(popularPosts);
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet, Route("dashboard/popular-posts-chosen-month")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetPopularPostsAllTimeChosenMonth(int month)
+        {
+            try
+            {
+                var popularPosts = await _dashboardService.GetMostPopularPostsChosenMonth(month);
+                return Ok(popularPosts);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet, Route("dashboard/popular-bloggers-all-time")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetPopularBloggers()
+        {
+            try
+            {
+                // Call the service method to get the 10 most popular bloggers
+                var popularBloggers = await _dashboardService.GetMostPopularBloggersAllTime();
+                return Ok(popularBloggers);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet, Route("dashboard/popular-bloggers-chosen-month")]
+        public async Task<IActionResult> GetPopularBloggers(int month)
+        {
+            try
+            {
+                // Call the service method to get the most popular bloggers for the chosen month
+                var popularBloggers = await _dashboardService.GetMostPopularBloggersChosenMonth(month);
+                return Ok(popularBloggers);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }
