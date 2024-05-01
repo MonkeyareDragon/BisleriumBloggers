@@ -1,4 +1,5 @@
 ﻿using Application.BisleriumBlog;
+using Domain.BisleriumBlog.Model;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -20,21 +21,37 @@ namespace Infrastructure.BisleriumBlog
 
         public async Task<DashboardCounts> GetDashboardCounts()
         {
-            var totalUsers = await _dbContext.Users.CountAsync();
-            var totalPosts = await _dbContext.Posts.CountAsync();
-            var totalComments = await _dbContext.Comments.CountAsync();
-            var totalReplies = await _dbContext.Replys.CountAsync();
-            var totalVotes = await _dbContext.Votes.CountAsync();
-
-            // Count total comments including replies
-            totalComments += totalReplies;
+            var userCount = await _dbContext.Users.CountAsync();
+            var postCount = await _dbContext.Posts.CountAsync();
+            var totalCommentCount = await _dbContext.Comments.CountAsync() + await _dbContext.Replys.CountAsync();
+            var upvoteCount = await _dbContext.Votes.CountAsync(v => v.VoteType == VoteType.Upvote);
+            var downvoteCount = await _dbContext.Votes.CountAsync(v => v.VoteType == VoteType.Downvote);
 
             return new DashboardCounts
             {
-                TotalUsers = totalUsers,
-                TotalPosts = totalPosts,
-                TotalComments = totalComments,
-                TotalVotes = totalVotes
+                UserCount = userCount,
+                PostCount = postCount,
+                TotalCommentCount = totalCommentCount,
+                UpvoteCount = upvoteCount,
+                DownvoteCount = downvoteCount
+            };
+        }
+
+        public async Task<DashboardCounts> GetDashboardCountsOnChoosenTime(DateTime startDate, DateTime endDate)
+        {
+            var userCount = await _dbContext.Users.Where(u => u.CreatedAt >= startDate && u.CreatedAt <= endDate).CountAsync();
+            var postCount = await _dbContext.Posts.Where(p => p.CreatedAt >= startDate && p.CreatedAt <= endDate).CountAsync();
+            var totalCommentCount = await _dbContext.Comments.Where(c => c.CreatedAt >= startDate && c.CreatedAt <= endDate).CountAsync() + await _dbContext.Replys.Where(r => r.CreatedAt >= startDate && r.CreatedAt <= endDate).CountAsync();
+            var upvoteCount = await _dbContext.Votes.Where(v => v.CreatedAt >= startDate && v.CreatedAt <= endDate && v.VoteType == VoteType.Upvote).CountAsync();
+            var downvoteCount = await _dbContext.Votes.Where(v => v.CreatedAt >= startDate && v.CreatedAt <= endDate && v.VoteType == VoteType.Downvote).CountAsync();
+
+            return new DashboardCounts
+            {
+                UserCount = userCount,
+                PostCount = postCount,
+                TotalCommentCount = totalCommentCount,
+                UpvoteCount = upvoteCount,
+                DownvoteCount = downvoteCount
             };
         }
     }

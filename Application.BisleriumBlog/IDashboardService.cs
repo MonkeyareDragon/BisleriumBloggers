@@ -10,5 +10,6 @@ namespace Application.BisleriumBlog
     public interface IDashboardService
     {
         Task<DashboardCounts> GetDashboardCounts();
+        Task<DashboardCounts> GetDashboardCountsOnChoosenTime(DateTime startDate, DateTime endDate);
     }
 }

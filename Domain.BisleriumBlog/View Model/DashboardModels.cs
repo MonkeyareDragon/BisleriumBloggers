@@ -10,10 +10,11 @@ namespace Domain.BisleriumBlog.View_Model
     {
         public class DashboardCounts
         {
-            public int TotalUsers { get; set; }
-            public int TotalPosts { get; set; }
-            public int TotalComments { get; set; }
-            public int TotalVotes { get; set; }
+            public int UserCount { get; set; }
+            public int PostCount { get; set; }
+            public int TotalCommentCount { get; set; } 
+            public int UpvoteCount { get; set; }
+            public int DownvoteCount { get; set; }
         }
     }
 }
