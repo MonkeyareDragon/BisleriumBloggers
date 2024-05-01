@@ -37,7 +37,7 @@ namespace Domain.BisleriumBlog.Model
 
     public enum VoteType
     {
-        Upvote,
-        Downvote
+        Upvote = 1,
+        Downvote = 0
     }
 }

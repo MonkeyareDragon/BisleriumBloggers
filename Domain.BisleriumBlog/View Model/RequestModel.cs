@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.BisleriumBlog.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,6 +25,13 @@ namespace Domain.BisleriumBlog.View_Model
         {
             public Guid CommentId { get; set; }
             public string? ReplyText { get; set; }
+        }
+        public class VoteRequestModel
+        {
+            public Guid? PostId { get; set; }
+            public Guid? CommentId { get; set; }
+            public Guid? ReplyId { get; set; }
+            public VoteType VoteType { get; set; }
         }
     }
 }
