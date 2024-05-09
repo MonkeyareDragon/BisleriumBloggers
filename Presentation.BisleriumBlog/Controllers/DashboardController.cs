@@ -60,7 +60,7 @@ namespace Presentation.BisleriumBlog.Controllers
 
         [HttpGet, Route("dashboard/popular-posts-chosen-month")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetPopularPostsAllTimeChosenMonth(int month)
+        public async Task<IActionResult> GetPopularPostsChosenMonth(int month)
         {
             try
             {
@@ -90,7 +90,7 @@ namespace Presentation.BisleriumBlog.Controllers
         }
 
         [HttpGet, Route("dashboard/popular-bloggers-chosen-month")]
-        public async Task<IActionResult> GetPopularBloggers(int month)
+        public async Task<IActionResult> GetPopularBloggersChosenMonth(int month)
         {
             try
             {
