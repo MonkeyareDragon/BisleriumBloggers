@@ -24,12 +24,12 @@ namespace Domain.BisleriumBlog.View_Model
         }
         public class LoginViewModel
         {
-            [Required]
             [EmailAddress]
             public string? Email { get; set; }
             [Required]
             [DataType(DataType.Password)]
             public string? Password { get; set; }
+            public string? Username {  get; set; }
         }
         public class RegisterViewModel
         {
@@ -44,6 +44,8 @@ namespace Domain.BisleriumBlog.View_Model
             [DataType(DataType.Password)]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string? ConfirmPassword { get; set; }
+            [Required]
+            public string? Username { get; set; }
 
             [Required]
             public string? Role { get; set; } // Property to specify the role of the user

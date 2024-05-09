@@ -6,8 +6,12 @@ using Microsoft.OpenApi.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Domain.BisleriumBlog.Model;
+using Microsoft.Extensions.FileProviders;
+using Application.BisleriumBlog.Utils;
+using Infrastructure.BisleriumBlog.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
+var apiCorsPolicy = "ApiCorsPolicy";
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -24,12 +28,13 @@ builder.Services.AddAuthorization();
 builder.Services.AddDbContext<ApplicationDBContext>();
 builder.Services.AddControllers();
 
-//Add Controller and Interface
+//Add Service and Interface
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IReplyService, ReplyService>();
 builder.Services.AddScoped<IVoteService, VoteService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IFileService, FileService>();
 
 builder.Services.AddControllersWithViews()
     .AddNewtonsoftJson(options =>
@@ -90,6 +95,20 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+//CORS Service
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: apiCorsPolicy,
+                      builder =>
+                      {
+                          builder.WithOrigins("https://localhost:5181")
+                            .AllowAnyHeader()
+                            .AllowAnyMethod()
+                            .AllowCredentials();
+                          //.WithMethods("OPTIONS", "GET");
+                      });
+});
+
 var app = builder.Build();
 
 // Seed roles into the database
@@ -113,6 +132,9 @@ using (var scope = app.Services.CreateScope())
 //Map Identity routes
 //app.MapIdentityApi<AppUser>();
 
+//CORS Enable For Web
+app.UseCors(apiCorsPolicy);
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -121,6 +143,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+           Path.Combine(builder.Environment.ContentRootPath, "Uploads")),
+    RequestPath = "/image"
+});
 
 app.UseAuthorization();
 

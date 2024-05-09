@@ -20,60 +20,69 @@ namespace Infrastructure.BisleriumBlog
                 .HasOne(p => p.User)
                 .WithMany(p => p.Posts)
                 .HasForeignKey(p => p.UserId)
-                .IsRequired();
+                .IsRequired()
+                .OnDelete(DeleteBehavior.ClientCascade);
 
             // One-to-Many Relationship between Post and Comment
             builder.Entity<Comment>()
                 .HasOne(c => c.Post)
                 .WithMany(p => p.Comments)
                 .HasForeignKey(c => c.PostId)
-                .IsRequired();
+                .IsRequired()
+                .OnDelete(DeleteBehavior.ClientCascade);
 
             // One-to-Many Relationship between User and Comment
             builder.Entity<Comment>()
                 .HasOne(c => c.User)
                 .WithMany(u => u.Comments)
                 .HasForeignKey(c => c.UserId)
-                .IsRequired();
+                .IsRequired()
+                .OnDelete(DeleteBehavior.ClientCascade);
 
             //One-to-Many Relationship between Comment and Reply
             builder.Entity<Reply>()
                 .HasOne(r => r.Comment)
                 .WithMany(r => r.Replys)
                 .HasForeignKey(r => r.CommentId)
-                .IsRequired();
+                .IsRequired()
+                .OnDelete(DeleteBehavior.ClientCascade);
 
             //One-to-Many Relationship between User and Relpy
             builder.Entity<Reply>()
                 .HasOne(c => c.User)
                 .WithMany(r => r.Replys)
                 .HasForeignKey(c => c.UserId)
-                .IsRequired();
+                .IsRequired()
+                .OnDelete(DeleteBehavior.ClientCascade);
 
             // Many-to-One Relationship between User and Vote
             builder.Entity<Vote>()
                 .HasOne(v => v.User)
                 .WithMany(u => u.Votes)
                 .HasForeignKey(v => v.UserId)
-                .IsRequired();
+                .IsRequired()
+                .OnDelete(DeleteBehavior.ClientCascade);
 
             // Many-to-One Relationship between Post and Vote
             builder.Entity<Vote>()
                 .HasOne(v => v.Post)
                 .WithMany(p => p.Votes)
-                .HasForeignKey(v => v.PostId);
+                .HasForeignKey(v => v.PostId)
+                .OnDelete(DeleteBehavior.ClientCascade);
 
             // Many-to-One Relationship between Comment and Vote
             builder.Entity<Vote>()
                 .HasOne(v => v.Comment)
                 .WithMany(c => c.Votes)
-                .HasForeignKey(v => v.CommentId);
+                .HasForeignKey(v => v.CommentId)
+                .OnDelete(DeleteBehavior.ClientCascade);
 
             // Many-to-One Relationship between Reply and Vote
             builder.Entity<Vote>()
                 .HasOne(v => v.Reply)
                 .WithMany(r => r.Votes)
-                .HasForeignKey(v => v.ReplyId);
+                .HasForeignKey(v => v.ReplyId)
+                .OnDelete(DeleteBehavior.ClientCascade);
 
             // Enum for VoteType
             builder.Entity<Vote>()

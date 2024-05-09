@@ -16,7 +16,7 @@ namespace Presentation.BisleriumBlog.Controllers
         }
 
         [HttpPost, Route("vote/create")]
-        [Authorize(Roles = "Admin, User")]
+        [Authorize(Roles = "Admin, Blogger")]
         public async Task<IActionResult> CreateVote([FromBody] VoteRequestModel model)
         {
             try
@@ -38,7 +38,7 @@ namespace Presentation.BisleriumBlog.Controllers
         }
 
         [HttpDelete, Route("vote/remove")]
-        [Authorize(Roles = "Admin, User")]
+        [AllowAnonymous]
         public async Task<IActionResult> RemoveVote(Guid voteId)
         {
             try
@@ -64,7 +64,7 @@ namespace Presentation.BisleriumBlog.Controllers
         }
 
         [HttpPut, Route("vote/update")]
-        [Authorize(Roles = "Admin, User")]
+        [Authorize(Roles = "Admin, Blogger")]
         public async Task<IActionResult> UpdateVoteType(Guid voteId, VoteType newVoteType)
         {
             try

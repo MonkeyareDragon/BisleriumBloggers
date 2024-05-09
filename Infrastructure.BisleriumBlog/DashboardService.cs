@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static Domain.BisleriumBlog.View_Model.DashboardModels;
+using static Domain.BisleriumBlog.View_Model.SendViewModels;
 
 namespace Infrastructure.BisleriumBlog
 {
@@ -69,54 +70,87 @@ namespace Infrastructure.BisleriumBlog
             return popularity;
         }
 
-        public async Task<List<Post>> GetMostPopularPostsAllTime()
+        public async Task<List<PostSummaryDTO>> GetMostPopularPostsAllTime()
         {
             var posts = await _dbContext.Posts
                 .Include(p => p.Comments)
                 .ToListAsync();
 
-            // Order posts by popularity using LINQ without modifying the Post class
-            var popularPosts = posts.OrderByDescending(p => CalculatePopularity(p)).Take(10).ToList();
+            // Project required details into instances of PostSummaryDTO
+            var popularPosts = posts.OrderByDescending(p => CalculatePopularity(p))
+                                    .Take(10)
+                                    .Select(p => new PostSummaryDTO
+                                    {
+                                        PostId = p.PostId,
+                                        Title = p.Title,
+                                        CreatedAt = p.CreatedAt ?? DateTime.MinValue,
+                                        Popularity = CalculatePopularity(p),
+                                        CommentsCount = p.Comments != null ? p.Comments.Count : 0
+                                    })
+                                    .ToList();
 
             return popularPosts;
         }
 
-        public async Task<List<Post>> GetMostPopularPostsChosenMonth(int month)
+        public async Task<List<PostSummaryDTO>> GetMostPopularPostsChosenMonth(int month)
         {
             var posts = await _dbContext.Posts
                 .Include(p => p.Comments)
+                .Where(p => p.CreatedAt != null && p.CreatedAt.Value.Month == month)
                 .ToListAsync();
 
-            // Filter posts based on the chosen month
-            posts = posts.Where(p => p.CreatedAt?.Month == month).ToList();
-
-            // Order posts by popularity using LINQ without modifying the Post class
-            var popularPosts = posts.OrderByDescending(p => CalculatePopularity(p)).Take(10).ToList();
+            // Project required details into instances of PostSummaryDTO
+            var popularPosts = posts.OrderByDescending(p => CalculatePopularity(p))
+                                    .Take(10)
+                                    .Select(p => new PostSummaryDTO
+                                    {
+                                        PostId = p.PostId,
+                                        Title = p.Title,
+                                        CreatedAt = p.CreatedAt ?? DateTime.MinValue,
+                                        Popularity = CalculatePopularity(p),
+                                        CommentsCount = p.Comments != null ? p.Comments.Count : 0
+                                    })
+                                    .ToList();
 
             return popularPosts;
         }
 
-        public async Task<List<AppUser>> GetMostPopularBloggersAllTime()
+        private int CalculateBlogPopularity(Post post)
+        {
+            int upvotes = _dbContext.Votes.Count(v => v.PostId == post.PostId && v.VoteType == VoteType.Upvote);
+            int downvotes = _dbContext.Votes.Count(v => v.PostId == post.PostId && v.VoteType == VoteType.Downvote);
+            int commentsCount = post.Comments != null ? post.Comments.Count : 0;
+
+            // Define weightage values
+            int upvoteWeightage = 2;
+            int downvoteWeightage = -1;
+            int commentWeightage = 1;
+
+            // Calculate popularity score for the post
+            int popularity = (upvoteWeightage * upvotes) + (downvoteWeightage * downvotes) + (commentWeightage * commentsCount);
+            return popularity;
+        }
+
+        public async Task<List<BloggerSummaryDTO>> GetMostPopularBloggersAllTime()
         {
             var posts = await _dbContext.Posts
                 .Include(p => p.User)
                 .ToListAsync();
 
             var bloggers = posts.GroupBy(p => p.UserId)
-                .Select(g => new
+                .Select(g => new BloggerSummaryDTO
                 {
                     UserId = g.Key,
-                    PopularityScore = g.Sum(p => CalculatePopularity(p))
+                    Username = g.First().User.UserName,
+                    CreatedAt = g.First().User.CreatedAt ?? DateTime.MinValue,
+                    PopularityScore = g.Sum(p => CalculateBlogPopularity(p)),
+                    TotalPosts = g.Count()
                 })
                 .OrderByDescending(g => g.PopularityScore)
                 .Take(10)
                 .ToList();
 
-            var popularBloggers = await _dbContext.Users
-                .Where(u => bloggers.Select(b => b.UserId).Contains(u.Id))
-                .ToListAsync();
-
-            return popularBloggers;
+            return bloggers;
         }
 
         public async Task<List<AppUser>> GetMostPopularBloggersChosenMonth(int month)

@@ -4,6 +4,7 @@ using Infrastructure.BisleriumBlog;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.BisleriumBlog.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240505054942_PhotoModel")]
+    partial class PhotoModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -380,13 +383,13 @@ namespace Infrastructure.BisleriumBlog.Migrations
                     b.HasOne("Domain.BisleriumBlog.Model.Post", "Post")
                         .WithMany("Comments")
                         .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Domain.BisleriumBlog.Model.AppUser", "User")
                         .WithMany("Comments")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Post");
@@ -399,7 +402,7 @@ namespace Infrastructure.BisleriumBlog.Migrations
                     b.HasOne("Domain.BisleriumBlog.Model.AppUser", "User")
                         .WithMany("Posts")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -410,13 +413,13 @@ namespace Infrastructure.BisleriumBlog.Migrations
                     b.HasOne("Domain.BisleriumBlog.Model.Comment", "Comment")
                         .WithMany("Replys")
                         .HasForeignKey("CommentId")
-                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Domain.BisleriumBlog.Model.AppUser", "User")
                         .WithMany("Replys")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Comment");
@@ -428,23 +431,20 @@ namespace Infrastructure.BisleriumBlog.Migrations
                 {
                     b.HasOne("Domain.BisleriumBlog.Model.Comment", "Comment")
                         .WithMany("Votes")
-                        .HasForeignKey("CommentId")
-                        .OnDelete(DeleteBehavior.ClientCascade);
+                        .HasForeignKey("CommentId");
 
                     b.HasOne("Domain.BisleriumBlog.Model.Post", "Post")
                         .WithMany("Votes")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.ClientCascade);
+                        .HasForeignKey("PostId");
 
                     b.HasOne("Domain.BisleriumBlog.Model.Reply", "Reply")
                         .WithMany("Votes")
-                        .HasForeignKey("ReplyId")
-                        .OnDelete(DeleteBehavior.ClientCascade);
+                        .HasForeignKey("ReplyId");
 
                     b.HasOne("Domain.BisleriumBlog.Model.AppUser", "User")
                         .WithMany("Votes")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Comment");

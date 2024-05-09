@@ -18,7 +18,7 @@ namespace Presentation.BisleriumBlog.Controllers
 
         [HttpPost, Route("post/add")]
         [Authorize(Roles = "Admin, Blogger")]
-        public async Task<IActionResult> AddPost([FromBody] PostRequestModel model)
+        public async Task<IActionResult> AddPost([FromForm] PostRequestModel model, IFormFile imageFile)
         {
             try
             {
@@ -29,7 +29,7 @@ namespace Presentation.BisleriumBlog.Controllers
                     return BadRequest("User id claim not found in token.");
                 }
 
-                var post = await _postService.AddPost(userId, model.Title, model.Content, model.ImageUrl);
+                var post = await _postService.AddPost(userId, model.Title, model.Content, model.ImageUrl, imageFile);
                 return Ok(post);
             }
             catch (Exception ex)
@@ -45,11 +45,36 @@ namespace Presentation.BisleriumBlog.Controllers
             return Ok(await _postService.GetAllPosts());
         }
 
+        [HttpGet, Route("post/get-all-recent")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAllPostsSorted()
+        {
+            var sortedPosts = await _postService.GetAllPostsSorted();
+            return Ok(sortedPosts);
+        }
+
+        [HttpGet, Route("post/get-all-sorted-by-popularity")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAllPostsSortedByPopularity()
+        {
+            var sortedPosts = await _postService.GetAllPostsSortedByPopularity();
+            return Ok(sortedPosts);
+        }
+
+        [HttpGet, Route("post/get-random")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetRandomPosts()
+        {
+            var randomPosts = await _postService.GetRandomPosts();
+            return Ok(randomPosts);
+        }
+
+
         [HttpGet, Route("post/get-by-id")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetPostByID(string id)
         {
-            var result = await _postService.GetPostbyId(id);
+            var result = await _postService.GetPostByIdResponse(id);
             return Ok(result);
         }
 
@@ -97,7 +122,7 @@ namespace Presentation.BisleriumBlog.Controllers
             {
                 post.Title = model.Title;
                 post.Content = model.Content;
-                post.ImageUrl = model.ImageUrl;
+                //post.ImageUrl = model.ImageUrl;
                 post.UpdatedAt = DateTime.UtcNow;
 
                 // Update the post in the database
@@ -115,6 +140,14 @@ namespace Presentation.BisleriumBlog.Controllers
 
             // Return Forbidden if user is not authorized to update the post
             return Forbid();
+        }
+
+        [HttpGet, Route("post/get-all-comment-details")]
+        [Authorize(Roles = "Admin, Blogger")]
+        public async Task<ActionResult<IEnumerable<object>>> GetCommentsWithReplies(Guid postId)
+        {
+            var commentsWithReplies = await _postService.GetCommentsWithReplies(postId);
+            return Ok(commentsWithReplies);
         }
     }
 }

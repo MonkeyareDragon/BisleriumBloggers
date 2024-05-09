@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Diagnostics;
+using System.Drawing.Printing;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -20,7 +22,7 @@ namespace Presentation.BisleriumBlog.Controllers
         private readonly IConfiguration _configuration;
         private readonly SignInManager<AppUser> _signInManager;
 
-        public record LoginResponse(bool Flag, string Token, String Message);
+        public record LoginResponse(bool Flag, string Id, string Name, string Email, string Token, string Role, String Message);
         public record UserSession(string? Id, string? Name, string? Email, string? Role);
 
         public AccountController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration, SignInManager<AppUser> signInManager)
@@ -62,7 +64,7 @@ namespace Presentation.BisleriumBlog.Controllers
                 return BadRequest(ModelState);
             }
 
-            var user = new AppUser { UserName = model.Email, Email = model.Email, CreatedAt = DateTime.Now, Address = model.Address, Gender = model.Gender };
+            var user = new AppUser { UserName = model.Username, Email = model.Email, CreatedAt = DateTime.Now, Address = model.Address, Gender = model.Gender };
 
             // Check if the specified role exists
             var roleExists = await _roleManager.RoleExistsAsync(model.Role);
@@ -84,23 +86,22 @@ namespace Presentation.BisleriumBlog.Controllers
         }
 
         [HttpPost("Login")]
-        public async Task<LoginResponse> Login([FromBody] LoginViewModel loginUser)
+        public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginViewModel loginUser)
         {
-            var result = await _signInManager.PasswordSignInAsync(loginUser.Email, loginUser.Password, false, lockoutOnFailure: false);
+            var result = await _signInManager.PasswordSignInAsync(loginUser.Username, loginUser.Password, false, lockoutOnFailure: false);
+            Debug.WriteLine(result);
             if (result.Succeeded)
             {
-
                 var getUser = await _userManager.FindByEmailAsync(loginUser.Email);
                 var getUserRole = await _userManager.GetRolesAsync(getUser);
                 var userSession = new UserSession(getUser.Id, getUser.UserName, getUser.Email, getUserRole.First());
                 string token = GenerateToken(userSession);
 
-                return new LoginResponse(true, token!, "Login completed");
-
+                return Ok(new LoginResponse(true, getUser.Id, getUser.UserName, getUser.Email, token!, getUserRole.First(), "Login completed"));
             }
             else
             {
-                return new LoginResponse(false, null!, "Login not completed");
+                return NotFound(new LoginResponse(false, null, null, null, null!, null, "Invalid email or password"));
             }
         }
 
