@@ -1,6 +1,7 @@
 ﻿using Domain.BisleriumBlog.Model;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -43,6 +44,12 @@ namespace Domain.BisleriumBlog.View_Model
             public DateTime CreatedAt { get; set; }
             public int PopularityScore { get; set; }
             public int TotalPosts { get; set; }
+        }
+
+        public class NotificationSummaryDTO
+        {
+            [Required]
+            public string? NotificationNote { get; set; }
         }
     }
 }
