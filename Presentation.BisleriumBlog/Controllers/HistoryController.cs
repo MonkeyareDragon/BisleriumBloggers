@@ -1,25 +1,23 @@
 ﻿using Application.BisleriumBlog;
-using Infrastructure.BisleriumBlog;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using static Domain.BisleriumBlog.View_Model.RequestModel;
 using System.Security.Claims;
 using static Domain.BisleriumBlog.View_Model.SendViewModels;
 
 namespace Presentation.BisleriumBlog.Controllers
 {
-    public class NotificationController : Controller
+    public class HistoryController : Controller
     {
-        private readonly INotificationService _notificationService;
+        private readonly IHistoryService _historyService;
 
-        public NotificationController(INotificationService notificationService)
+        public HistoryController(IHistoryService historyService)
         {
-            _notificationService = notificationService;
+            _historyService = historyService;
         }
 
-        [HttpPost("notification/Add")]
+        [HttpPost("history/add")]
         [Authorize(Roles = "Admin, Blogger")]
-        public async Task<IActionResult> AddNotification([FromBody] NotificationSummaryDTO model)
+        public async Task<IActionResult> AddHistory(HistoryDTO model)
         {
             try
             {
@@ -30,8 +28,8 @@ namespace Presentation.BisleriumBlog.Controllers
                     return BadRequest("User id claim not found in token.");
                 }
 
-                var notification = await _notificationService.AddNotification(userId, model.NotificationNote);
-                return Ok(notification);
+                var history = await _historyService.AddHistory(userId, model.PostId, model.CommentId, model.PreviousContent, model.UpdatedContent);
+                return Ok(history);
             }
             catch (Exception ex)
             {
@@ -39,9 +37,9 @@ namespace Presentation.BisleriumBlog.Controllers
             }
         }
 
-        [HttpGet("notification/Get")]
+        [HttpGet("history/get")]
         [Authorize(Roles = "Admin, Blogger")]
-        public async Task<IActionResult> GetAllNotifications()
+        public async Task<IActionResult> GetAllHistory()
         {
             try
             {
@@ -52,13 +50,14 @@ namespace Presentation.BisleriumBlog.Controllers
                     return BadRequest("User id claim not found in token.");
                 }
 
-                var notifications = await _notificationService.GetAllNotifications(userId);
-                return Ok(notifications);
+                var history = await _historyService.GetAllHistory(userId);
+                return Ok(history);
             }
             catch (Exception ex)
             {
                 return StatusCode(500, ex.Message);
             }
         }
+
     }
 }

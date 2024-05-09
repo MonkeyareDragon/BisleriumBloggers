@@ -51,5 +51,13 @@ namespace Domain.BisleriumBlog.View_Model
             [Required]
             public string? NotificationNote { get; set; }
         }
+
+        public class HistoryDTO
+        {
+            public Guid? PostId { get; set; }
+            public Guid? CommentId { get; set; }
+            public string? PreviousContent { get; set; }
+            public string? UpdatedContent { get; set; }
+        }
     }
 }

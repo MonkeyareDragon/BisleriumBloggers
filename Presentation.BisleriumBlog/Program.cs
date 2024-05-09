@@ -36,6 +36,7 @@ builder.Services.AddScoped<IVoteService, VoteService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IHistoryService, HistoryService>();
 
 builder.Services.AddControllersWithViews()
     .AddNewtonsoftJson(options =>

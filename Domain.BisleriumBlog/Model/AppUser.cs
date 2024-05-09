@@ -17,5 +17,6 @@ namespace Domain.BisleriumBlog.Model
         public ICollection<Reply>? Replys { get; set; }
         public ICollection<Vote>? Votes { get; set; }
         public ICollection<Notification>? Notifications { get; set; }
+        public ICollection<History>? Historys { get; set; }
     }
 }

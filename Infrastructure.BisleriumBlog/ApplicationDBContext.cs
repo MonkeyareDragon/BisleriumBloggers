@@ -84,11 +84,33 @@ namespace Infrastructure.BisleriumBlog
                 .HasForeignKey(v => v.ReplyId)
                 .OnDelete(DeleteBehavior.ClientCascade);
 
-            // Many-to-One Relationship between Reply and Vote
+            // Many-to-One Relationship between Notification and User
             builder.Entity<Notification>()
                 .HasOne(v => v.User)
                 .WithMany(r => r.Notifications)
                 .HasForeignKey(v => v.UserId)
+                .OnDelete(DeleteBehavior.ClientCascade);
+
+            // Many-to-One Relationship between History and User
+            builder.Entity<History>()
+                .HasOne(v => v.User)
+                .WithMany(u => u.Historys)
+                .HasForeignKey(v => v.UserId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.ClientCascade);
+
+            // Many-to-One Relationship between Post and History
+            builder.Entity<History>()
+                .HasOne(v => v.Post)
+                .WithMany(p => p.Historys)
+                .HasForeignKey(v => v.PostId)
+                .OnDelete(DeleteBehavior.ClientCascade);
+
+            // Many-to-One Relationship between Comment and History
+            builder.Entity<History>()
+                .HasOne(v => v.Comment)
+                .WithMany(c => c.Historys)
+                .HasForeignKey(v => v.CommentId)
                 .OnDelete(DeleteBehavior.ClientCascade);
 
             // Enum for VoteType
@@ -114,5 +136,6 @@ namespace Infrastructure.BisleriumBlog
         public DbSet<Reply> Replys { get; set; }
         public DbSet<Vote> Votes { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<History> Historys { get; set; }
     }
 }
