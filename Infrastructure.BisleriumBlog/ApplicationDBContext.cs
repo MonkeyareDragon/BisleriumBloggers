@@ -91,6 +91,13 @@ namespace Infrastructure.BisleriumBlog
                 .HasForeignKey(v => v.UserId)
                 .OnDelete(DeleteBehavior.ClientCascade);
 
+            // Many-to-One Relationship between Notification and Post
+            builder.Entity<Notification>()
+                .HasOne(v => v.Post)
+                .WithMany(r => r.Notifications)
+                .HasForeignKey(v => v.PostId)
+                .OnDelete(DeleteBehavior.ClientCascade);
+
             // Many-to-One Relationship between History and User
             builder.Entity<History>()
                 .HasOne(v => v.User)

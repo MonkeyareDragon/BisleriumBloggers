@@ -15,7 +15,7 @@ namespace Application.BisleriumBlog
         Task<DashboardCounts> GetDashboardCountsOnChoosenTime(DateTime startDate, DateTime endDate);
         Task<List<PostSummaryDTO>> GetMostPopularPostsAllTime();
         Task<List<PostSummaryDTO>> GetMostPopularPostsChosenMonth(int month);
-        Task<List<BloggerSummaryDTO>> GetMostPopularBloggersAllTime();
-        Task<List<AppUser>> GetMostPopularBloggersChosenMonth(int month);
+        List<UserPopularityDto> GetMostPopularBloggersAllTime();
+        List<UserPopularityDto> GetMostPopularBloggersChosenMonth(int month);
     }
 }

@@ -11,5 +11,6 @@ namespace Application.BisleriumBlog
     {
         Task<History> AddHistory(string userId, Guid? postId, Guid? commentId, string previousContent, string UpdatedContent);
         Task<IEnumerable<History>> GetAllHistory(string userId);
+        Task<bool> DeleteHistoryAsync(Guid historyId);
     }
 }

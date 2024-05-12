@@ -110,6 +110,7 @@ namespace Infrastructure.BisleriumBlog
         {
             var posts = await _dbContext.Posts
                 .Include(p => p.User)
+                .Include(p => p.Votes)
                 .Include(p => p.Comments)
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();
@@ -123,7 +124,7 @@ namespace Infrastructure.BisleriumBlog
                 Title = post.Title,
                 Description = post.Content,
                 Image = post.ProfileImage,
-                VoteCount = post.Votes?.Count ?? 0,
+                VoteCount = CalculateVoteCount(post),
                 CommentCount = post.Comments?.Count ?? 0
             });
         }
@@ -201,6 +202,7 @@ namespace Infrastructure.BisleriumBlog
         {
             var post = await _dbContext.Posts
                 .Include(p => p.User)
+                .Include(p => p.Votes)
                 .Include(p => p.Comments)
                 .FirstOrDefaultAsync(p => p.PostId.ToString() == id);
 
@@ -219,25 +221,38 @@ namespace Infrastructure.BisleriumBlog
                 Title = post.Title,
                 Description = post.Content,
                 Image = post.ProfileImage,
-                VoteCount = post.Votes?.Count ?? 0,
+                VoteCount = CalculateVoteCount(post),
                 CommentCount = post.Comments?.Count ?? 0
             };
         }
 
 
-        public async Task<Post?> UpdatePost(Post post)
+        public async Task<Post?> UpdatePost(Post post, IFormFile imageFile)
         {
-            var selectedPost = await _dbContext.Posts.FindAsync(post.PostId);
-            if (selectedPost != null)
+            if (imageFile != null)
             {
-                selectedPost.Title = post.Title;
-                selectedPost.Content = post.Content;
-                selectedPost.UpdatedAt = DateTime.UtcNow;
-                
-                _dbContext.Entry(selectedPost).State = EntityState.Modified;
-                await _dbContext.SaveChangesAsync();
+                var fileResult = _fileService.SaveImage(imageFile);
+                if (fileResult.Item1 == 1)
+                {
+                    var selectedPost = await _dbContext.Posts.FindAsync(post.PostId);
+                    if (selectedPost != null)
+                    {
+                        selectedPost.Title = post.Title;
+                        selectedPost.Content = post.Content;
+                        selectedPost.UpdatedAt = DateTime.UtcNow;
+                        selectedPost.ProfileImage = fileResult.Item2;
 
-                return selectedPost;
+                        _dbContext.Entry(selectedPost).State = EntityState.Modified;
+                        await _dbContext.SaveChangesAsync();
+
+                        return selectedPost;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+                return null;
             }
             else
             {

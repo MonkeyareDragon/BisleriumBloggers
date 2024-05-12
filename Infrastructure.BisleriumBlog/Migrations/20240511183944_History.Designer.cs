@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.BisleriumBlog.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20240509131838_History")]
+    [Migration("20240511183944_History")]
     partial class History
     {
         /// <inheritdoc />

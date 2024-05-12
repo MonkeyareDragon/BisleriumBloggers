@@ -17,20 +17,13 @@ namespace Presentation.BisleriumBlog.Controllers
             _notificationService = notificationService;
         }
 
-        [HttpPost("notification/Add")]
+        [HttpPost("notification/add")]
         [Authorize(Roles = "Admin, Blogger")]
         public async Task<IActionResult> AddNotification([FromBody] NotificationSummaryDTO model)
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return BadRequest("User id claim not found in token.");
-                }
-
-                var notification = await _notificationService.AddNotification(userId, model.NotificationNote);
+                var notification = await _notificationService.AddNotification(model);
                 return Ok(notification);
             }
             catch (Exception ex)
@@ -39,7 +32,7 @@ namespace Presentation.BisleriumBlog.Controllers
             }
         }
 
-        [HttpGet("notification/Get")]
+        [HttpGet("notification/get")]
         [Authorize(Roles = "Admin, Blogger")]
         public async Task<IActionResult> GetAllNotifications()
         {
@@ -59,6 +52,14 @@ namespace Presentation.BisleriumBlog.Controllers
             {
                 return StatusCode(500, ex.Message);
             }
+        }
+
+        [HttpDelete("notification/delete")]
+        [Authorize(Roles = "Admin, Blogger")]
+        public async Task<IActionResult> DeleteNotification(Guid id)
+        {
+            await _notificationService.DeleteNotification(id);
+            return Ok();
         }
     }
 }

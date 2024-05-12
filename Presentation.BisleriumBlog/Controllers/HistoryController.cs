@@ -17,7 +17,7 @@ namespace Presentation.BisleriumBlog.Controllers
 
         [HttpPost("history/add")]
         [Authorize(Roles = "Admin, Blogger")]
-        public async Task<IActionResult> AddHistory(HistoryDTO model)
+        public async Task<IActionResult> AddHistory([FromBody] HistoryDTO model)
         {
             try
             {
@@ -57,6 +57,19 @@ namespace Presentation.BisleriumBlog.Controllers
             {
                 return StatusCode(500, ex.Message);
             }
+        }
+
+        [HttpDelete("history/delete")]
+        [Authorize(Roles = "Admin, Blogger")]
+        public async Task<IActionResult> DeleteHistory(Guid id)
+        {
+            var deleted = await _historyService.DeleteHistoryAsync(id);
+            if (!deleted)
+            {
+                return NotFound(); // History record not found
+            }
+
+            return Ok(); // History record deleted successfully
         }
 
     }

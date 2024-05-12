@@ -37,17 +37,18 @@ namespace Domain.BisleriumBlog.View_Model
             public int CommentsCount { get; set; }
         }
 
-        public class BloggerSummaryDTO
+        public class UserPopularityDto
         {
             public string? UserId { get; set; }
             public string? Username { get; set; }
-            public DateTime CreatedAt { get; set; }
+            public DateTime? CreatedAt { get; set; }
             public int PopularityScore { get; set; }
             public int TotalPosts { get; set; }
         }
 
         public class NotificationSummaryDTO
         {
+            public Guid? PostId { get; set; }
             [Required]
             public string? NotificationNote { get; set; }
         }
@@ -56,8 +57,20 @@ namespace Domain.BisleriumBlog.View_Model
         {
             public Guid? PostId { get; set; }
             public Guid? CommentId { get; set; }
+            [Required]
             public string? PreviousContent { get; set; }
+            [Required]
             public string? UpdatedContent { get; set; }
+        }
+
+        public class NotificationDTO
+        {
+            public Guid? NotificationId { get; set; }
+            public string? UserId { get; set; }
+            public Guid? PostId { get; set; }
+            public string? Note { get; set; }
+            public DateTime? CreatedAt { get; set; }
+            public string? PostImage { get; set; }
         }
     }
 }

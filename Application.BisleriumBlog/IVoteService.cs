@@ -4,13 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Domain.BisleriumBlog.View_Model.RequestModel;
 
 namespace Application.BisleriumBlog
 {
     public interface IVoteService
     {
-        Task<Vote> CreateVote(string userId, Guid? postId, Guid? commentId, Guid? replyId, VoteType voteType);
-        Task RemoveVote(string userId, Guid voteId);
-        Task UpdateVoteType(string userId, Guid voteId, VoteType newVoteType);
+        Task<bool> CreateVoteAsync(VoteRequestModel model);
+        Task<bool> UpdateVoteAsync(string userId, Guid? postId, Guid? commentId, Guid? replyId, VoteType newVoteType);
+        Task<bool> DeleteVoteAsync(string userId, Guid? postId, Guid? commentId, Guid? replyId);
     }
 }

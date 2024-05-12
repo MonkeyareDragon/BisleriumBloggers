@@ -71,7 +71,7 @@ namespace Presentation.BisleriumBlog.Controllers
 
 
         [HttpGet, Route("post/get-by-id")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Blogger")]
         public async Task<IActionResult> GetPostByID(string id)
         {
             var result = await _postService.GetPostByIdResponse(id);
@@ -102,7 +102,7 @@ namespace Presentation.BisleriumBlog.Controllers
 
         [HttpPut, Route("post/update")]
         [Authorize(Roles = "Admin, Blogger")]
-        public async Task<IActionResult> UpdatePostByID(Guid postId, [FromBody] PostRequestModel model)
+        public async Task<IActionResult> UpdatePostByID(Guid postId, [FromForm] PostRequestModel model, IFormFile imageFile)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -126,7 +126,7 @@ namespace Presentation.BisleriumBlog.Controllers
                 post.UpdatedAt = DateTime.UtcNow;
 
                 // Update the post in the database
-                var updatedPost = await _postService.UpdatePost(post);
+                var updatedPost = await _postService.UpdatePost(post, imageFile);
 
                 if (updatedPost != null)
                 {

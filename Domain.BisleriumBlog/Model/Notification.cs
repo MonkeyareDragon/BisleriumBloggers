@@ -13,8 +13,10 @@ namespace Domain.BisleriumBlog.Model
         public Guid NotificationID { get; set; }
         [Required]
         public string? UserId { get; set; }
+        public Guid? PostId { get; set; }
         public DateTime? CreatedAt { get; set; }
         public string? Note { get; set; }
         public AppUser? User { get; set; }
+        public Post? Post { get; set; }
     }
 }

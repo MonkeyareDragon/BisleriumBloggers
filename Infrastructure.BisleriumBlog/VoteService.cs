@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Domain.BisleriumBlog.View_Model.RequestModel;
 
 namespace Infrastructure.BisleriumBlog
 {
@@ -17,65 +18,70 @@ namespace Infrastructure.BisleriumBlog
             _dbContext = dbContext;
         }
 
-        public async Task<Vote> CreateVote(string userId, Guid? postId, Guid? commentId, Guid? replyId, VoteType voteType)
+        public async Task<bool> CreateVoteAsync(VoteRequestModel model)
         {
+            // Ensure only one of PostId, CommentId, or ReplyId is provided
+            if ((model.PostId.HasValue ? 1 : 0) + (model.CommentId.HasValue ? 1 : 0) + (model.ReplyId.HasValue ? 1 : 0) != 1)
+            {
+                throw new ArgumentException("Provide exactly one of PostId, CommentId, or ReplyId.");
+            }
+
+            // Check if the combination of UserId and provided Id is unique
+            if (await _dbContext.Votes.AnyAsync(v =>
+                v.UserId == model.UserId &&
+                (v.PostId == model.PostId || v.CommentId == model.CommentId || v.ReplyId == model.ReplyId)))
+            {
+                throw new InvalidOperationException("Vote already exists for the given entity.");
+            }
+
             var vote = new Vote
             {
-                VoteId = Guid.NewGuid(),
-                UserId = userId,
-                PostId = postId,
-                CommentId = commentId,
-                ReplyId = replyId,
-                VoteType = voteType,
-                CreatedAt = DateTime.UtcNow
+                UserId = model.UserId,
+                PostId = model.PostId,
+                CommentId = model.CommentId,
+                ReplyId = model.ReplyId,
+                VoteType = model.VoteType,
+                CreatedAt = DateTime.Now
             };
 
-            try
-            {
-                _dbContext.Votes.Add(vote);
-                await _dbContext.SaveChangesAsync();
-                return vote;
-            }
-            catch (DbUpdateException ex)
-            {
-                // Handle unique constraint violation
-                if (ex.InnerException is Microsoft.Data.SqlClient.SqlException sqlException && sqlException.Number == 2601)
-                {
-                    // Unique constraint violation
-                    throw new InvalidOperationException("You have already voted on this post, comment, or reply.");
-                }
-                throw;
-            }
+            _dbContext.Votes.Add(vote);
+            await _dbContext.SaveChangesAsync();
+
+            return true;
         }
 
-        public async Task RemoveVote(string userId, Guid voteId)
+        public async Task<bool> UpdateVoteAsync(string userId, Guid? postId, Guid? commentId, Guid? replyId, VoteType newVoteType)
         {
-            var vote = await _dbContext.Votes.FirstOrDefaultAsync(v => v.VoteId == voteId && v.UserId == userId);
+            var vote = await _dbContext.Votes.FirstOrDefaultAsync(v =>
+                v.UserId == userId &&
+                (v.PostId == postId || v.CommentId == commentId || v.ReplyId == replyId));
 
-            if (vote != null)
+            if (vote == null)
             {
-                _dbContext.Votes.Remove(vote);
-                await _dbContext.SaveChangesAsync();
+                throw new KeyNotFoundException("Vote not found.");
             }
-            else
-            {
-                throw new InvalidOperationException("Vote not found or you are not authorized to remove this vote.");
-            }
+
+            vote.VoteType = newVoteType;
+            await _dbContext.SaveChangesAsync();
+
+            return true;
         }
 
-        public async Task UpdateVoteType(string userId, Guid voteId, VoteType newVoteType)
+        public async Task<bool> DeleteVoteAsync(string userId, Guid? postId, Guid? commentId, Guid? replyId)
         {
-            var vote = await _dbContext.Votes.FirstOrDefaultAsync(v => v.VoteId == voteId && v.UserId == userId);
+            var vote = await _dbContext.Votes.FirstOrDefaultAsync(v =>
+                v.UserId == userId &&
+                (v.PostId == postId || v.CommentId == commentId || v.ReplyId == replyId));
 
-            if (vote != null)
+            if (vote == null)
             {
-                vote.VoteType = newVoteType;
-                await _dbContext.SaveChangesAsync();
+                throw new KeyNotFoundException("Vote not found.");
             }
-            else
-            {
-                throw new InvalidOperationException("Vote not found or you are not authorized to update this vote.");
-            }
+
+            _dbContext.Votes.Remove(vote);
+            await _dbContext.SaveChangesAsync();
+
+            return true;
         }
     }
 }

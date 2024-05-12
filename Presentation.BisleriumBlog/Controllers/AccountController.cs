@@ -186,7 +186,7 @@ namespace Presentation.BisleriumBlog.Controllers
             }
 
             user.Email = model.Email;
-            user.UserName = model.Email;
+            user.UserName = model.Username;
 
             var roleExists = await _roleManager.RoleExistsAsync(model.Role);
             if (!roleExists)

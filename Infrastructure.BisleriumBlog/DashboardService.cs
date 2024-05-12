@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static Domain.BisleriumBlog.View_Model.DashboardModels;
 using static Domain.BisleriumBlog.View_Model.SendViewModels;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Infrastructure.BisleriumBlog
 {
@@ -115,69 +116,72 @@ namespace Infrastructure.BisleriumBlog
             return popularPosts;
         }
 
-        private int CalculateBlogPopularity(Post post)
+        private int CalculatePopularityScore(AppUser user)
         {
-            int upvotes = _dbContext.Votes.Count(v => v.PostId == post.PostId && v.VoteType == VoteType.Upvote);
-            int downvotes = _dbContext.Votes.Count(v => v.PostId == post.PostId && v.VoteType == VoteType.Downvote);
-            int commentsCount = post.Comments != null ? post.Comments.Count : 0;
-
-            // Define weightage values
             int upvoteWeightage = 2;
             int downvoteWeightage = -1;
             int commentWeightage = 1;
 
-            // Calculate popularity score for the post
-            int popularity = (upvoteWeightage * upvotes) + (downvoteWeightage * downvotes) + (commentWeightage * commentsCount);
-            return popularity;
+            int upvotes = _dbContext.Votes.Count(v => v.UserId == user.Id && v.VoteType == VoteType.Upvote);
+            int downvotes = _dbContext.Votes.Count(v => v.UserId == user.Id && v.VoteType == VoteType.Downvote);
+            int comments = _dbContext.Comments.Count(c => c.UserId == user.Id);
+
+            return upvoteWeightage * upvotes + downvoteWeightage * downvotes + commentWeightage * comments;
         }
 
-        public async Task<List<BloggerSummaryDTO>> GetMostPopularBloggersAllTime()
+        public List<UserPopularityDto> GetMostPopularBloggersAllTime()
         {
-            var posts = await _dbContext.Posts
-                .Include(p => p.User)
-                .ToListAsync();
+            // Fetch users from the database into memory
+            var users = _dbContext.Users.Include(u => u.Posts)
+                                         .ThenInclude(p => p.Comments)
+                                         .ToList();
 
-            var bloggers = posts.GroupBy(p => p.UserId)
-                .Select(g => new BloggerSummaryDTO
-                {
-                    UserId = g.Key,
-                    Username = g.First().User.UserName,
-                    CreatedAt = g.First().User.CreatedAt ?? DateTime.MinValue,
-                    PopularityScore = g.Sum(p => CalculateBlogPopularity(p)),
-                    TotalPosts = g.Count()
-                })
-                .OrderByDescending(g => g.PopularityScore)
-                .Take(10)
-                .ToList();
+            // Perform sorting and projection locally
+            var userPopularity = users.Select(u => new UserPopularityDto
+            {
+                UserId = u.Id,
+                Username = u.UserName,
+                CreatedAt = u.CreatedAt,
+                PopularityScore = CalculatePopularityScore(u),
+                TotalPosts = u.Posts.Count
+            })
+                                    .OrderByDescending(u => u.PopularityScore)
+                                    .Take(10)
+                                    .ToList();
 
-            return bloggers;
+            return userPopularity;
         }
 
-        public async Task<List<AppUser>> GetMostPopularBloggersChosenMonth(int month)
+        public List<UserPopularityDto> GetMostPopularBloggersChosenMonth(int month)
         {
-            var startDate = new DateTime(DateTime.Now.Year, month, 1);
-            var endDate = startDate.AddMonths(1).Date;
+            var minPopularityScore = 0; // Set your minimum popularity score here
+            var minTotalPosts = 0; // Set your minimum total posts here
 
-            var posts = await _dbContext.Posts
-                .Include(p => p.User)
-                .Where(p => p.CreatedAt >= startDate && p.CreatedAt <= endDate)
-                .ToListAsync();
-
-            var bloggers = posts.GroupBy(p => p.UserId)
-                .Select(g => new
+            var users = _dbContext.Users
+                .Select(u => new
                 {
-                    UserId = g.Key,
-                    PopularityScore = g.Sum(p => CalculatePopularity(p))
+                    User = u,
+                    TotalUpvotes = u.Posts.SelectMany(p => p.Votes).Count(v => v.VoteType == VoteType.Upvote),
+                    TotalDownvotes = u.Posts.SelectMany(p => p.Votes).Count(v => v.VoteType == VoteType.Downvote),
+                    TotalComments = u.Posts.SelectMany(p => p.Comments).Count()
                 })
-                .OrderByDescending(g => g.PopularityScore)
+                .Where(u => u.User.CreatedAt != null && u.User.CreatedAt.Value.Month == month)
+                .OrderByDescending(u => 2 * u.TotalUpvotes + (-1) * u.TotalDownvotes + u.TotalComments)
                 .Take(10)
+                .Select(u => new UserPopularityDto
+                {
+                    UserId = u.User.Id,
+                    Username = u.User.UserName,
+                    CreatedAt = u.User.CreatedAt,
+                    TotalPosts = u.User.Posts.Count,
+                    PopularityScore = 2 * u.TotalUpvotes + (-1) * u.TotalDownvotes + u.TotalComments
+                })
+                .Where(u => u.CreatedAt != null && u.CreatedAt.Value.Month == month &&
+                            u.PopularityScore >= minPopularityScore &&
+                            u.TotalPosts >= minTotalPosts)
                 .ToList();
 
-            var popularBloggers = await _dbContext.Users
-                .Where(u => bloggers.Select(b => b.UserId).Contains(u.Id))
-                .ToListAsync();
-
-            return popularBloggers;
+            return users;
         }
     }
 }

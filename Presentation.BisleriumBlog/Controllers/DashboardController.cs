@@ -80,7 +80,7 @@ namespace Presentation.BisleriumBlog.Controllers
             try
             {
                 // Call the service method to get the 10 most popular bloggers
-                var popularBloggers = await _dashboardService.GetMostPopularBloggersAllTime();
+                var popularBloggers = _dashboardService.GetMostPopularBloggersAllTime();
                 return Ok(popularBloggers);
             }
             catch (Exception ex)
@@ -95,7 +95,7 @@ namespace Presentation.BisleriumBlog.Controllers
             try
             {
                 // Call the service method to get the most popular bloggers for the chosen month
-                var popularBloggers = await _dashboardService.GetMostPopularBloggersChosenMonth(month);
+                var popularBloggers = _dashboardService.GetMostPopularBloggersChosenMonth(month);
                 return Ok(popularBloggers);
             }
             catch (Exception ex)

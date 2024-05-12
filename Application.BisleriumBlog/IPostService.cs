@@ -16,7 +16,7 @@ namespace Application.BisleriumBlog
         Task<IEnumerable<PostDTO>> GetAllPostsSorted();
         Task<IEnumerable<PostDTO>> GetAllPostsSortedByPopularity();
         Task<IEnumerable<PostDTO>> GetRandomPosts();
-        Task<Post?> UpdatePost(Post post);
+        Task<Post?> UpdatePost(Post post, IFormFile imageFile);
         Task DeletePost(string id);
         Task<IEnumerable<Post>> GetPostbyId(string id);
         Task<PostDTO?> GetPostByIdResponse(string id);

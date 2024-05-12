@@ -26,6 +26,7 @@ namespace Domain.BisleriumBlog.Model
         public AppUser? User { get; set; }
         public ICollection<Comment>? Comments { get; set; }
         public ICollection<Vote>? Votes { get; set; }
+        public ICollection<Notification>? Notifications { get; set; }
         public ICollection<History>? Historys { get; set; }
     }
 }
