@@ -1,12 +1,15 @@
 ﻿using Domain.BisleriumBlog;
 using Domain.BisleriumBlog.Model;
+using Infrastructure.BisleriumBlog.Utils;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
 using System.Drawing.Printing;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
 using static Domain.BisleriumBlog.View_Model.AuthenticationViewModel;
@@ -21,16 +24,18 @@ namespace Presentation.BisleriumBlog.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly EmailService _emailService;
 
         public record LoginResponse(bool Flag, string Id, string Name, string Email, string Token, string Role, String Message);
         public record UserSession(string? Id, string? Name, string? Email, string? Role);
 
-        public AccountController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration, SignInManager<AppUser> signInManager)
+        public AccountController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration, SignInManager<AppUser> signInManager, EmailService emailService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _configuration = configuration;
             _signInManager = signInManager;
+            _emailService = emailService;
         }
 
         //Generate Jwt Token
@@ -105,7 +110,21 @@ namespace Presentation.BisleriumBlog.Controllers
             }
         }
 
-        [HttpPost("forgot-password")]
+        // Base64 URL encode method
+        private string Base64UrlEncode(string input)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(input);
+            return WebEncoders.Base64UrlEncode(bytes);
+        }
+
+        // Base64 URL decode method
+        private string Base64UrlDecode(string input)
+        {
+            byte[] bytes = WebEncoders.Base64UrlDecode(input);
+            return Encoding.UTF8.GetString(bytes);
+        }
+
+        [HttpGet("forgot-password/{email}")]
         public async Task<IActionResult> ForgotPassword(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
@@ -113,17 +132,24 @@ namespace Presentation.BisleriumBlog.Controllers
             {
                 return NotFound("User not found.");
             }
+            
+            // Generate the password reset token
+            string token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
-            // Generate password reset token
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            // Encode the token
+            string encodedToken = Base64UrlEncode(token);
+
+            // Construct the reset password URL
+            string resetUrl = $"{_configuration["Url"]}/password-change/{user.Id}/{encodedToken}";
+            _emailService.SendEmailAsync(email, "Your Password Change Link.", _emailService.FormatPasswordResetEmail(resetUrl));
 
             // Send the token to the user's email
             // For demonstration purposes, we'll just return the token and user id
-            return Ok(new { UserId = user.Id, Token = token });
+            return Ok(new { resetUrl , encodedToken });
         }
 
         [HttpPost("change-password")]
-        public async Task<IActionResult> ResetPassword(string userId, string token, ChangePasswordViewModel model)
+        public async Task<IActionResult> ResetPassword(string userId, string token, [FromBody] ChangePasswordViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -135,9 +161,10 @@ namespace Presentation.BisleriumBlog.Controllers
             {
                 return NotFound("User not found.");
             }
+            string decodedToken = Base64UrlDecode(token);
 
             // Reset password
-            var result = await _userManager.ResetPasswordAsync(user, token, model.NewPassword);
+            var result = await _userManager.ResetPasswordAsync(user, decodedToken, model.NewPassword);
             if (result.Succeeded)
             {
                 return Ok("Password reset successfully.");
@@ -207,5 +234,6 @@ namespace Presentation.BisleriumBlog.Controllers
 
             return BadRequest(result.Errors);
         }
+
     }
 }

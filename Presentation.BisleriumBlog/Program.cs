@@ -38,6 +38,8 @@ builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IHistoryService, HistoryService>();
 
+builder.Services.AddScoped<EmailService>();
+
 builder.Services.AddControllersWithViews()
     .AddNewtonsoftJson(options =>
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
@@ -46,6 +48,7 @@ builder.Services.AddControllersWithViews()
 //Activate Identity APIs
 builder.Services.AddIdentity<AppUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDBContext>().AddSignInManager()
+    .AddDefaultTokenProviders()
     .AddRoles<IdentityRole>();
 
 // Add Authentication
